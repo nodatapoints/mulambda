@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define LAMBDA_SYMBOL 'L'
 #define DOT_SYMBOL '.'
@@ -21,10 +22,11 @@ typedef struct Expr {
         } app;
         char freeVar;
         const struct Expr *func;
-    } content;
+    } data;
 } Expr;
 
-const Expr* getExprList(FILE * const fp, Expr** const expr, const Expr ** const vars, int* const parenLevel);
-void printExpr(const Expr* const expr, int indent);
+const Expr* getExprList(FILE *fp, const Expr **vars, int* parenLevel);
+void freeExpr(const Expr* expr);
+void printExpr(const Expr* expr);
 
 #endif  // PARSER_H

@@ -1,42 +1,48 @@
 #include "parser.h"
 
+#define MALLOC(X) { \
+    X = (Expr*) malloc(sizeof(Expr)); \
+    if (!X) RAISE(NULL, "could not allocate memory") \
+    X->type = NULL_T; }
+
 static char getsymbol(FILE *fp) {
     char c;
     while (isspace(c = fgetc(fp)));
     return c;
 }
 
-static const Expr* getExpr(FILE * const fp, Expr ** const p, const Expr ** const vars, int * const parenLevel);
+static const Expr* getExpr(FILE * const fp, const Expr ** const vars, int * const parenLevel);
 
-const Expr* getExprList(FILE * const fp, Expr ** const p, const Expr ** const vars, int * const parenLevel) {
+const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
     int currentLevel = *parenLevel;
     const Expr *expr, *arg;
     Expr *app;
 
-    expr = getExpr(fp, p, vars, parenLevel);
-    if (expr == NULL) return NULL;
-    if (expr == *p) RAISE(NULL, "empty expression\n");
+    expr = getExpr(fp, vars, parenLevel);
+    if (!expr) {
+        if (*parenLevel < currentLevel) RAISE(NULL, "empty expression\n");
+        return NULL;
+    }
 
-    ++ *p;
-    while (currentLevel == *parenLevel) {
-        app = (*p)++;
-        arg = getExpr(fp, p, vars, parenLevel);
-        if (arg == *p)
-            return expr;
-
-        if (arg == NULL)
+    while (1) {
+        arg = getExpr(fp, vars, parenLevel);
+        if (!arg)
+            if (*parenLevel < currentLevel)
+                return expr;
+        else
             return NULL;
 
+        MALLOC(app)
         app->type = APP;
-        app->content.app.func = expr;
-        app->content.app.arg = arg;
+        app->data.app.func = expr;
+        app->data.app.arg = arg;
 
         expr = app;
     }
     return expr;
 }
 
-static const Expr* getFunction(FILE * const fp, Expr ** const p, const Expr ** const vars, int * const parenLevel) {
+static const Expr* getFunction(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
     char c;
     const Expr *prev, *body;
     Expr *func;
@@ -47,84 +53,105 @@ static const Expr* getFunction(FILE * const fp, Expr ** const p, const Expr ** c
 
     if (getsymbol(fp) != DOT_SYMBOL) RAISE(NULL, "expected %c\n", DOT_SYMBOL)
 
-    prev = vars[c];
-    vars[c] = func = (*p)++;
+    MALLOC(func)
 
-    body = getExprList(fp, p, vars, parenLevel);
-    if (body == NULL) return NULL;
+    prev = vars[c];
+    vars[c] = func;
+
+    body = getExprList(fp, vars, parenLevel);
+    if (!body) return NULL;
 
     vars[c] = prev;
 
     func->type = FUNC;
-    func->content.func = body;
+    func->data.func = (Expr*) body;
 
     return func;
 }
 
-static const Expr* getVar(Expr ** const p, const Expr ** const vars, char c) {
-    Expr * const var = (*p)++;
+static const Expr* getVar(const Expr ** const vars, char c) {
+    Expr *var;
+    MALLOC(var)
     if (!isalpha(c)) RAISE(NULL, "invalid character: %c\n", c)
 
-    if (vars[c] == NULL) {
+    if (!vars[c]) {
         var->type = FREE;
-        var->content.freeVar = c;
+        var->data.freeVar = c;
     } else {
         var->type = BOUND;
-        var->content.func = vars[c];
+        var->data.func = (Expr*) vars[c];
     }
     return var;
 }
 
-static const Expr* getExpr(FILE * const fp, Expr ** const p, const Expr ** const vars, int * const parenLevel) {
+static const Expr* getExpr(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
     char c;
     const Expr *next, *arg;
 
     switch (c = getsymbol(fp)) {
         case LAMBDA_SYMBOL:
-            return getFunction(fp, p, vars, parenLevel);
+            return getFunction(fp, vars, parenLevel);
 
         case EOF:
             if (*parenLevel > 0) RAISE(NULL, "expected %c\n", CLOSEPAREN_SYMBOL)
-            return *p;
+            --(*parenLevel);
+            return NULL;
 
         case OPENPAREN_SYMBOL:
             ++(*parenLevel);
-            return getExprList(fp, p, vars, parenLevel);
+            return getExprList(fp, vars, parenLevel);
 
         case CLOSEPAREN_SYMBOL:
             if (*parenLevel == 0) RAISE(NULL, "unexpected %c\n", CLOSEPAREN_SYMBOL)
             --(*parenLevel);
-            return *p;
+            return NULL;
 
         default:
-            return getVar(p, vars, c);
+            return getVar(vars, c);
     }
 }
 
-void printExpr(const Expr* const expr, int indent) {
+void freeExpr(const Expr * const expr) {
+    switch (expr->type) {
+        case FUNC:
+            freeExpr(expr->data.func);
+            break;
+        case APP:
+            freeExpr(expr->data.app.func);
+            freeExpr(expr->data.app.arg);
+        case BOUND:
+        case FREE:
+            break;
+        case NULL_T:
+            RAISE(, "cant free null\n")
+    }
+    free((void*) expr);
+}
+
+inline static void _printExprIndent(const Expr* const expr, int indent) {
     printf("%p: ", (void*) expr);
     for (int i = 0; i < indent; ++i) printf("  ");
 
     switch (expr->type) {
         case FREE:
-            printf("free '%c'\n", expr->content.freeVar);
+            printf("free '%c'\n", expr->data.freeVar);
             break;
 
         case BOUND:
-            printf("bound %p\n", (void*) expr->content.func);
+            printf("bound %p\n", (void*) expr->data.func);
             break;
 
         case FUNC:
-            printf("func @ %p\n", (void*) expr->content.func);
-            printExpr(expr->content.func, indent+1);
+            printf("func @ %p\n", (void*) expr->data.func);
+            _printExprIndent(expr->data.func, indent+1);
             break;
 
         case APP:
             printf("apply\n");
-            printExpr(expr->content.app.func, indent+1);
+            _printExprIndent(expr->data.app.func, indent+1);
             for (int i = 0; i < indent; ++i) printf("  ");
             printf("                to\n");
-            printExpr(expr->content.app.arg, indent+1);
+            _printExprIndent(expr->data.app.arg, indent+1);
             break;
 
         default:
@@ -133,3 +160,6 @@ void printExpr(const Expr* const expr, int indent) {
     }
 }
 
+void printExpr(const Expr* const expr) {
+    _printExprIndent(expr, 0);
+}
