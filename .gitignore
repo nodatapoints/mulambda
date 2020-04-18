@@ -1,0 +1,7 @@
+*.o
+mula
+.ycm_extra_conf.py
+tags
+*.l
+*.L
+
