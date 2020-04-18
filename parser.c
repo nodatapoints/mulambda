@@ -1,19 +1,12 @@
 #include "parser.h"
 
-#define MALLOC(X) { \
-    X = (Expr*) malloc(sizeof(Expr)); \
-    if (!X) RAISE(NULL, "could not allocate memory") \
-    X->type = NULL_T; }
-
 static char getsymbol(FILE *fp) {
     char c;
     while (isspace(c = fgetc(fp)));
     return c;
 }
 
-static const Expr* getExpr(FILE * const fp, const Expr ** const vars, int * const parenLevel);
-
-const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
+static const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
     int currentLevel = *parenLevel;
     const Expr *expr, *arg;
     Expr *app;
@@ -40,6 +33,20 @@ const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * const p
         expr = app;
     }
     return expr;
+}
+
+const Expr* parse(FILE * const fp) {
+    int parenLevel = 0;
+
+    const Expr *vars[256];
+    for (int i = 0; i < 256; ++i)
+        vars[i] = NULL;
+
+    const Expr *root = getExprList(fp, &vars[0], &parenLevel);
+    if (!root && parenLevel > -1)
+        return NULL;
+
+    return root;
 }
 
 static const Expr* getFunction(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
@@ -125,6 +132,9 @@ void freeExpr(const Expr * const expr) {
         case NULL_T:
             RAISE(, "cant free null\n")
     }
+#ifdef DEBUG
+    printf("debug: freeing %p\n", (void*) expr);
+#endif
     free((void*) expr);
 }
 

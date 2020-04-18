@@ -3,5 +3,5 @@ mula
 *.l
 *.L
 .ycm_extra_conf.py
-*.swap
+*.swp
 tags
