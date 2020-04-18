@@ -1,7 +1,5 @@
 #include "parser.h"
 
-#define RAISE(...) {fprintf(stderr, "error: "); fprintf(stderr, __VA_ARGS__); return NULL; }
-
 static char getsymbol(FILE *fp) {
     char c;
     while (isspace(c = fgetc(fp)));
@@ -17,7 +15,7 @@ const Expr* getExprList(FILE * const fp, Expr ** const p, const Expr ** const va
 
     expr = getExpr(fp, p, vars, parenLevel);
     if (expr == NULL) return NULL;
-    if (expr == *p) RAISE("empty expression\n");
+    if (expr == *p) RAISE(NULL, "empty expression\n");
 
     ++ *p;
     while (currentLevel == *parenLevel) {
@@ -44,10 +42,10 @@ static const Expr* getFunction(FILE * const fp, Expr ** const p, const Expr ** c
     Expr *func;
 
     c = getsymbol(fp);
-    if (c == EOF) RAISE("unexpected EOF in function\n")
-    if (!isalpha(c)) RAISE("invalid parameter: %c\n", c)
+    if (c == EOF) RAISE(NULL, "unexpected EOF in function\n")
+    if (!isalpha(c)) RAISE(NULL, "invalid parameter: %c\n", c)
 
-    if (getsymbol(fp) != DOT_SYMBOL) RAISE("expected %c\n", DOT_SYMBOL)
+    if (getsymbol(fp) != DOT_SYMBOL) RAISE(NULL, "expected %c\n", DOT_SYMBOL)
 
     prev = vars[c];
     vars[c] = func = (*p)++;
@@ -65,7 +63,7 @@ static const Expr* getFunction(FILE * const fp, Expr ** const p, const Expr ** c
 
 static const Expr* getVar(Expr ** const p, const Expr ** const vars, char c) {
     Expr * const var = (*p)++;
-    if (!isalpha(c)) RAISE("invalid character: %c\n", c)
+    if (!isalpha(c)) RAISE(NULL, "invalid character: %c\n", c)
 
     if (vars[c] == NULL) {
         var->type = FREE;
@@ -86,7 +84,7 @@ static const Expr* getExpr(FILE * const fp, Expr ** const p, const Expr ** const
             return getFunction(fp, p, vars, parenLevel);
 
         case EOF:
-            if (*parenLevel > 0) RAISE("expected %c\n", CLOSEPAREN_SYMBOL)
+            if (*parenLevel > 0) RAISE(NULL, "expected %c\n", CLOSEPAREN_SYMBOL)
             return *p;
 
         case OPENPAREN_SYMBOL:
@@ -94,7 +92,7 @@ static const Expr* getExpr(FILE * const fp, Expr ** const p, const Expr ** const
             return getExprList(fp, p, vars, parenLevel);
 
         case CLOSEPAREN_SYMBOL:
-            if (*parenLevel == 0) RAISE("unexpected %c\n", CLOSEPAREN_SYMBOL)
+            if (*parenLevel == 0) RAISE(NULL, "unexpected %c\n", CLOSEPAREN_SYMBOL)
             --(*parenLevel);
             return *p;
 

@@ -9,6 +9,8 @@
 #define OPENPAREN_SYMBOL '('
 #define CLOSEPAREN_SYMBOL ')'
 
+#define RAISE(RET, ...) {fprintf(stderr, "error: "); fprintf(stderr, __VA_ARGS__); return RET; }
+
 struct Expr;
 
 typedef struct Expr {
