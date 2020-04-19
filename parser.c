@@ -16,6 +16,7 @@ static const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * 
         if (*parenLevel < currentLevel) RAISE(NULL, "empty expression\n");
         return NULL;
     }
+    if (*parenLevel < currentLevel) return expr;
 
     while (1) {
         arg = getExpr(fp, vars, parenLevel);
@@ -35,7 +36,7 @@ static const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * 
     return expr;
 }
 
-const Expr* parse(FILE * const fp) {
+Expr* parse(FILE * const fp) {
     int parenLevel = 0;
 
     const Expr *vars[256];
@@ -46,7 +47,7 @@ const Expr* parse(FILE * const fp) {
     if (!root && parenLevel > -1)
         return NULL;
 
-    return root;
+    return (Expr*) root;
 }
 
 static const Expr* getFunction(FILE * const fp, const Expr ** const vars, int * const parenLevel) {

@@ -39,7 +39,7 @@ typedef struct Expr {
     } data;
 } Expr;
 
-const Expr* parse(FILE *fp);
+Expr* parse(FILE *fp);
 void freeExpr(const Expr* expr);
 void printExpr(const Expr* expr);
 
