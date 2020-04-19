@@ -6,7 +6,7 @@ static char getsymbol(FILE *fp) {
     return c;
 }
 
-static const Expr* getExprList(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
+static const Expr* getExprList(FILE * const fp, const Expr *vars[], int * const parenLevel) {
     int currentLevel = *parenLevel;
     const Expr *expr, *arg;
     Expr *app;
@@ -50,7 +50,7 @@ Expr* parse(FILE * const fp) {
     return (Expr*) root;
 }
 
-static const Expr* getFunction(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
+static const Expr* getFunction(FILE * const fp, const Expr *vars[], int * const parenLevel) {
     char c;
     const Expr *prev, *body;
     Expr *func;
@@ -77,7 +77,7 @@ static const Expr* getFunction(FILE * const fp, const Expr ** const vars, int * 
     return func;
 }
 
-static const Expr* getVar(const Expr ** const vars, char c) {
+static const Expr* getVar(const Expr *vars[], char c) {
     Expr *var;
     MALLOC(var)
     if (!isalpha(c)) RAISE(NULL, "invalid character: %c\n", c)
@@ -92,7 +92,7 @@ static const Expr* getVar(const Expr ** const vars, char c) {
     return var;
 }
 
-static const Expr* getExpr(FILE * const fp, const Expr ** const vars, int * const parenLevel) {
+static const Expr* getExpr(FILE * const fp, const Expr *vars[], int * const parenLevel) {
     char c;
     const Expr *next, *arg;
 

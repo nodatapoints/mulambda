@@ -44,11 +44,11 @@ void freeExpr(const Expr* expr);
 void printExpr(const Expr* expr);
 
 static char getsymbol(FILE *fp);
-static const Expr* getExprList(FILE *fp, const Expr **vars, int* parenLevel);
-static const Expr* getExpr(FILE * const fp, const Expr ** const vars, int * const parenLevel);
-static const Expr* getFunction(FILE * const fp, const Expr ** const vars, int * const parenLevel);
-static const Expr* getVar(const Expr ** const vars, char c);
-static const Expr* getExpr(FILE * const fp, const Expr ** const vars, int * const parenLevel);
-static inline void _printExprIndent(const Expr* const expr, int indent);
+static const Expr* getExprList(FILE *fp, const Expr *vars[], int* parenLevel);
+static const Expr* getExpr(FILE *fp, const Expr *vars[], int *parenLevel);
+static const Expr* getFunction(FILE *fp, const Expr *vars[], int *parenLevel);
+static const Expr* getVar(const Expr *vars[], char c);
+static const Expr* getExpr(FILE *fp, const Expr *vars[], int *parenLevel);
+static inline void _printExprIndent(const Expr*expr, int indent);
 
 #endif  // PARSER_H
