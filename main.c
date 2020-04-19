@@ -7,7 +7,12 @@ int main(int argc, const char *argv[]) {
     if (!fp) RAISE(1, "error: can't open file: %s\n", argv[1]);
 
     Expr *root = parse(fp);
+    if (!root) RAISE(2, "error: could not parse expression\n")
+
     fclose(fp);
+
+    root = eval(root);
+    if (!root) RAISE(2, "error: could not evaluate expression\n")
 
 #ifndef DEBUG
     printExpr(root);
