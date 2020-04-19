@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "eval.h"
 
 int main(int argc, const char *argv[]) {
     if (argc < 2) RAISE(1, "error: missing filename\n");
