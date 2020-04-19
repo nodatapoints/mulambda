@@ -1,4 +1,5 @@
 #include "eval.h"
+#include "repr.h"
 
 static int rebind(Expr * const expr, const Expr * const old, const Expr * new) {
     P_DEBUG("rebinding %p to %p in %p \n", (void*) old, (void*) new, (void*) expr)
@@ -110,7 +111,7 @@ Expr* eval(Expr *expr) {
     do {
 
 #ifdef DEBUG
-        printExpr(root);
+        printExprAST(expr);
         printf("-------------------------------------------------\n");
 #endif
 

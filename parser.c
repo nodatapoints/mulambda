@@ -136,39 +136,3 @@ void freeExpr(const Expr * const expr) {
     P_DEBUG("freeing %p\n", (void*) expr)
     free((void*) expr);
 }
-
-inline static void _printExprIndent(const Expr* const expr, int indent) {
-    printf("%p: ", (void*) expr);
-    for (int i = 0; i < indent; ++i) printf("  ");
-
-    switch (expr->type) {
-        case FREE:
-            printf("free '%c'\n", expr->data.freeVar);
-            break;
-
-        case BOUND:
-            printf("bound %p\n", (void*) expr->data.func);
-            break;
-
-        case FUNC:
-            printf("func @ %p\n", (void*) expr->data.func);
-            _printExprIndent(expr->data.func, indent+1);
-            break;
-
-        case APP:
-            printf("apply\n");
-            _printExprIndent(expr->data.app.func, indent+1);
-            for (int i = 0; i < indent; ++i) printf("  ");
-            printf("                to\n");
-            _printExprIndent(expr->data.app.arg, indent+1);
-            break;
-
-        default:
-            printf("null\n");
-            break;
-    }
-}
-
-void printExpr(const Expr* const expr) {
-    _printExprIndent(expr, 0);
-}
