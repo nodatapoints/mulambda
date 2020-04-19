@@ -18,8 +18,8 @@
     (X)->type = NULL_T; }
 
 #ifdef DEBUG
-#   define MALLOC(X) { _MALLOC(X); printf("debug: allocated %p\n", (void*) (X)); }
-#   define P_DEBUG(...) printf(__VA_ARGS__);
+#   define P_DEBUG(...) { printf("debug: "); printf(__VA_ARGS__); }
+#   define MALLOC(X) { _MALLOC(X); P_DEBUG("allocated %p\n", (void*) (X)); }
 #else
 #   define MALLOC(X) _MALLOC(X)
 #   define P_DEBUG(...) ;

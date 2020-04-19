@@ -87,10 +87,10 @@ Expr* expand(Expr * const expr, int * const n) {
                     expr->data.app.arg);
 
                 ret = (Expr*) expr->data.app.func->data.func;
-#ifdef DEBUG
-    printf("debug: freeing %p\n", (void*) expr->data.app.func);
-    printf("debug: freeing %p\n", (void*) expr);
-#endif
+
+                P_DEBUG("freeing %p\n", (void*) expr->data.app.func);
+                P_DEBUG("freeing %p\n", (void*) expr);
+
                 free((void*) expr->data.app.func);
                 freeExpr(expr->data.app.arg);
                 free((void*) expr);
@@ -121,11 +121,11 @@ Expr* eval(Expr *expr) {
         ++passes;
         if (passes > MAX_PASSES)
             RAISE(NULL, "exceeded expansion limit (%d)\n", MAX_PASSES);
+    } while (changes);
 
 #ifdef DEBUG
-        printf("done\ndissolved %d functions in %d passes\n", total, passes);
+    printf("done\ndissolved %d functions in %d passes\n", total, passes);
 #endif
 
-    } while (changes);
     return expr;
 }

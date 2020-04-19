@@ -133,9 +133,7 @@ void freeExpr(const Expr * const expr) {
         case NULL_T:
             RAISE(, "cant free null\n")
     }
-#ifdef DEBUG
-    printf("debug: freeing %p\n", (void*) expr);
-#endif
+    P_DEBUG("freeing %p\n", (void*) expr)
     free((void*) expr);
 }
 
