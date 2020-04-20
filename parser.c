@@ -26,6 +26,8 @@ static const Expr* getExprList(FILE * const fp, const Expr *vars[], int * const 
         else
             return NULL;
 
+        if (*parenLevel < currentLevel) return expr;
+
         MALLOC(app)
         app->type = APP;
         app->data.app.func = expr;
@@ -93,10 +95,8 @@ static const Expr* getVar(const Expr *vars[], char c) {
 }
 
 static const Expr* getExpr(FILE * const fp, const Expr *vars[], int * const parenLevel) {
-    char c;
-    const Expr *next, *arg;
-
-    switch (c = getsymbol(fp)) {
+    char c = getsymbol(fp);
+    switch (c) {
         case LAMBDA_SYMBOL:
             return getFunction(fp, vars, parenLevel);
 

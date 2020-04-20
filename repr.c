@@ -53,7 +53,7 @@ static void _prepareFuncLabels(Expr *expr) {
     }
 }
 
-static const char labelOrder[] = "xyzsabcdefghijklmnopqrtXYZABCDEFGHIJKMNOPQRSTUVW";
+static const char labelOrder[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 inline static int isAvailable(const Expr *expr, const char c) {
     switch (expr->type) {
