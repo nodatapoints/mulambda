@@ -26,7 +26,8 @@ static const Expr* getExprList(FILE * const fp, const Expr *vars[], int * const 
         else
             return NULL;
 
-        if (*parenLevel < currentLevel) return expr;
+        if (*parenLevel < currentLevel && 0 < currentLevel)
+            return expr;
 
         MALLOC(app)
         app->type = APP;
