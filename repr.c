@@ -95,7 +95,8 @@ void printExpr(const Expr *expr) {
             } else
                 printExpr(expr->data.app.func);
 
-            if (expr->data.app.arg->type == APP) {
+            if (expr->data.app.arg->type == APP
+                || expr->data.app.arg->type == FUNC) {
                 putchar(OPENPAREN_SYMBOL);
                 printExpr(expr->data.app.arg);
                 putchar(CLOSEPAREN_SYMBOL);

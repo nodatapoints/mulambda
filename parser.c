@@ -26,17 +26,15 @@ static const Expr* getExprList(FILE * const fp, const Expr *vars[], int * const 
         else
             return NULL;
 
-        if (*parenLevel < currentLevel && 0 < currentLevel)
-            return expr;
-
         MALLOC(app)
         app->type = APP;
         app->data.app.func = expr;
         app->data.app.arg = arg;
 
         expr = app;
+
+        if (*parenLevel < currentLevel) return expr;
     }
-    return expr;
 }
 
 Expr* parse(FILE * const fp) {
