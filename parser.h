@@ -40,14 +40,14 @@ typedef struct Expr {
     } data;
 } Expr;
 
-Expr* parse(FILE *fp);
+Expr* parse();
 void freeExpr(const Expr* expr);
 
-static char getsymbol(FILE *fp);
-static const Expr* getExprList(FILE *fp, const Expr *vars[], int* parenLevel);
-static const Expr* getExpr(FILE *fp, const Expr *vars[], int *parenLevel);
-static const Expr* getFunction(FILE *fp, const Expr *vars[], int *parenLevel);
+static char getsymbol();
+static const Expr* getExprList(const Expr *vars[], int* parenLevel);
+static const Expr* getExpr(const Expr *vars[], int *parenLevel);
+static const Expr* getFunction(const Expr *vars[], int *parenLevel);
 static const Expr* getVar(const Expr *vars[], char c);
-static const Expr* getExpr(FILE *fp, const Expr *vars[], int *parenLevel);
+static const Expr* getExpr(const Expr *vars[], int *parenLevel);
 
 #endif  // PARSER_H

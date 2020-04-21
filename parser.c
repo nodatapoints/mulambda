@@ -1,21 +1,21 @@
 #include "parser.h"
 
-static char getsymbol(FILE *fp) {
+static char getsymbol() {
     char c;
-    while (isspace(c = fgetc(fp)));
+    while (isspace(c = getchar()));
     if (c == COMMENT_SYMBOL) {
-        while (fgetc(fp) != '\n');
-        return getsymbol(fp);
+        while (getchar() != '\n');
+        return getsymbol();
     }
     return c;
 }
 
-static const Expr* getExprList(FILE * const fp, const Expr *vars[], int * const parenLevel) {
+static const Expr* getExprList(const Expr *vars[], int * const parenLevel) {
     int currentLevel = *parenLevel;
     const Expr *expr, *arg;
     Expr *app;
 
-    expr = getExpr(fp, vars, parenLevel);
+    expr = getExpr(vars, parenLevel);
     if (!expr) {
         if (*parenLevel < currentLevel) RAISE(NULL, "empty expression\n");
         return NULL;
@@ -23,7 +23,7 @@ static const Expr* getExprList(FILE * const fp, const Expr *vars[], int * const 
     if (*parenLevel < currentLevel) return expr;
 
     while (1) {
-        arg = getExpr(fp, vars, parenLevel);
+        arg = getExpr(vars, parenLevel);
         if (!arg)
             if (*parenLevel < currentLevel)
                 return expr;
@@ -48,30 +48,30 @@ Expr* parse(FILE * const fp) {
     for (int i = 0; i < 256; ++i)
         vars[i] = NULL;
 
-    const Expr *root = getExprList(fp, &vars[0], &parenLevel);
+    const Expr *root = getExprList(&vars[0], &parenLevel);
     if (!root && parenLevel > -1)
         return NULL;
 
     return (Expr*) root;
 }
 
-static const Expr* getFunction(FILE * const fp, const Expr *vars[], int * const parenLevel) {
+static const Expr* getFunction(const Expr *vars[], int * const parenLevel) {
     char c;
     const Expr *prev, *body;
     Expr *func;
 
-    c = getsymbol(fp);
+    c = getsymbol();
     if (c == EOF) RAISE(NULL, "unexpected EOF in function\n")
     if (!isalpha(c)) RAISE(NULL, "invalid parameter: %c\n", c)
 
-    if (getsymbol(fp) != DOT_SYMBOL) RAISE(NULL, "expected %c\n", DOT_SYMBOL)
+    if (getsymbol() != DOT_SYMBOL) RAISE(NULL, "expected %c\n", DOT_SYMBOL)
 
     MALLOC(func)
 
     prev = vars[c];
     vars[c] = func;
 
-    body = getExprList(fp, vars, parenLevel);
+    body = getExprList(vars, parenLevel);
     if (!body) return NULL;
 
     vars[c] = prev;
@@ -97,11 +97,11 @@ static const Expr* getVar(const Expr *vars[], char c) {
     return var;
 }
 
-static const Expr* getExpr(FILE * const fp, const Expr *vars[], int * const parenLevel) {
-    char c = getsymbol(fp);
+static const Expr* getExpr(const Expr *vars[], int * const parenLevel) {
+    char c = getsymbol();
     switch (c) {
         case LAMBDA_SYMBOL:
-            return getFunction(fp, vars, parenLevel);
+            return getFunction(vars, parenLevel);
 
         case EOF:
             if (*parenLevel > 0) RAISE(NULL, "expected %c\n", CLOSEPAREN_SYMBOL)
@@ -110,7 +110,7 @@ static const Expr* getExpr(FILE * const fp, const Expr *vars[], int * const pare
 
         case OPENPAREN_SYMBOL:
             ++(*parenLevel);
-            return getExprList(fp, vars, parenLevel);
+            return getExprList(vars, parenLevel);
 
         case CLOSEPAREN_SYMBOL:
             if (*parenLevel == 0) RAISE(NULL, "unexpected %c\n", CLOSEPAREN_SYMBOL)
