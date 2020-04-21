@@ -41,7 +41,7 @@ static const Expr* getExprList(const Expr *vars[], int * const parenLevel) {
     }
 }
 
-Expr* parse(FILE * const fp) {
+Expr* parse() {
     int parenLevel = 0;
 
     const Expr *vars[256];

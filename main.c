@@ -2,7 +2,7 @@
 #include "eval.h"
 #include "repr.h"
 
-int main(int argc, const char *argv[]) {
+int main() {
     Expr *root = parse();
     if (!root) RAISE(2, "could not parse expression\n")
 
