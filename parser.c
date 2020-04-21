@@ -3,6 +3,10 @@
 static char getsymbol(FILE *fp) {
     char c;
     while (isspace(c = fgetc(fp)));
+    if (c == COMMENT_SYMBOL) {
+        while (fgetc(fp) != '\n');
+        return getsymbol(fp);
+    }
     return c;
 }
 
